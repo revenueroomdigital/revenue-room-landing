@@ -8,7 +8,7 @@ export default async function handler(req, res) {
 
     if (!makeWebhookUrl) {
       console.error("MAKE_WEBHOOK_URL environment variable is not defined");
-      return res.status(500).json({ message: "Server configuration error" });
+      return res.status(500).json({ message: "MAKE_WEBHOOK_URL environment variable is missing. Please add it to your Vercel project settings." });
     }
 
     const response = await fetch(makeWebhookUrl, {
@@ -22,10 +22,11 @@ export default async function handler(req, res) {
     if (response.ok) {
       return res.status(200).json({ message: "Success" });
     } else {
-      return res.status(response.status).json({ message: "Failed to forward request to Make webhook" });
+      const errorText = await response.text();
+      return res.status(response.status).json({ message: `Make Webhook returned ${response.status}: ${errorText}` });
     }
   } catch (error) {
     console.error("Webhook forwarding error:", error);
-    return res.status(500).json({ message: "Internal Server Error" });
+    return res.status(500).json({ message: `Internal Server Error: ${error.message}` });
   }
 }

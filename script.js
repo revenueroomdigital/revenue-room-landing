@@ -176,7 +176,14 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!response.ok) {
-                console.error('Failed to submit form to webhook');
+                let errorMsg = 'Failed to submit form to webhook';
+                try {
+                    const errorData = await response.json();
+                    errorMsg = errorData.message || errorMsg;
+                } catch (e) {
+                    // Ignore JSON parsing errors
+                }
+                console.error(`Error ${response.status}: ${errorMsg}`);
             }
         } catch (error) {
             console.error('Error submitting form:', error);
