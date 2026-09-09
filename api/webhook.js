@@ -11,11 +11,17 @@ export default async function handler(req, res) {
       return res.status(500).json({ message: "MAKE_WEBHOOK_URL environment variable is missing. Please add it to your Vercel project settings." });
     }
 
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (process.env.X_API_KEY) {
+      headers['x-api-key'] = process.env.X_API_KEY;
+    }
+
     const response = await fetch(makeWebhookUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: headers,
       body: JSON.stringify(req.body),
     });
 
