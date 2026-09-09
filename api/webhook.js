@@ -25,10 +25,21 @@ export default async function handler(req, res) {
       'x-make-apikey': apiKey
     };
 
+    // Extract Geolocation headers provided automatically by Vercel in production
+    const country = req.headers['x-vercel-ip-country'] || "Unknown";
+    const city = req.headers['x-vercel-ip-city'] || "Unknown";
+
+    const payload = {
+      ...req.body,
+      submittedAt: new Date().toISOString(),
+      country,
+      city
+    };
+
     const response = await fetch(makeWebhookUrl, {
       method: 'POST',
       headers: headers,
-      body: JSON.stringify(req.body),
+      body: JSON.stringify(payload),
     });
 
     if (response.ok) {
