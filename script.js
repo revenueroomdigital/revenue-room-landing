@@ -148,18 +148,52 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Prevent default form submission and transition to success view
-    document.getElementById('onboardingForm').addEventListener('submit', (e) => {
+    document.getElementById('onboardingForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // At this point, the user would normally send the data via fetch/XHR
-        // Example: const formData = new FormData(e.target);
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
+        // Add the source property specifically for this landing page
+        data.source = "Landing Page";
+
+        // Get the full formatted phone number with country code
+        if (typeof phoneInput !== 'undefined' && phoneInput.getNumber) {
+            data.mobileNumber = phoneInput.getNumber();
+        }
         
-        // Hide all steps and show Success UI inside the form container
-        hideAllSteps();
-        
-        const successView = document.getElementById('success-view');
-        successView.classList.remove('hidden');
-        successView.classList.add('flex');
+        try {
+            // Show loading state
+            submitFinal.disabled = true;
+            submitFinal.innerHTML = 'SUBMITTING...';
+
+            // Post to Vercel API endpoint (which handles Make webhook)
+            const response = await fetch('/api/webhook', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+                console.error('Failed to submit form to webhook');
+            }
+        } catch (error) {
+            console.error('Error submitting form:', error);
+        } finally {
+            // Restore button state
+            submitFinal.disabled = false;
+            submitFinal.innerHTML = `
+                SUBMIT
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+            `;
+            
+            // Show Success UI inside the form container
+            hideAllSteps();
+            const successView = document.getElementById('success-view');
+            successView.classList.remove('hidden');
+            successView.classList.add('flex');
+        }
     });
 });
 
@@ -515,3 +549,4 @@ document.addEventListener("DOMContentLoaded", () => {
         renderReviews(reviewsPerLoad);
     });
 });
+
