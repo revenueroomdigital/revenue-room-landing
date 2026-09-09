@@ -21,7 +21,8 @@ export default async function handler(req, res) {
       'Content-Type': 'application/json',
       'x-api-key': apiKey,
       'Authorization': `Bearer ${apiKey}`,
-      'api-key': apiKey
+      'api-key': apiKey,
+      'x-make-apikey': apiKey
     };
 
     const response = await fetch(makeWebhookUrl, {
